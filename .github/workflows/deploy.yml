@@ -1,0 +1,76 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout DSP library
+        uses: actions/checkout@v4
+        with:
+          repository: aicodix/dsp
+          path: dsp
+
+      - name: Checkout Code library
+        uses: actions/checkout@v4
+        with:
+          repository: aicodix/code
+          path: code
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '3.1.51'
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Build WASM
+        run: |
+          cd web
+          em++ -std=c++17 -O2 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=0 \
+               -s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=134217728 \
+               -s EXPORTED_FUNCTIONS='["_malloc","_free"]' \
+               -s EXPORTED_RUNTIME_METHODS='["HEAPF32"]' \
+               --bind -I../dsp -I../code \
+               -o ofdmtv.js ofdmtv_wasm.cc
+
+      - name: Prepare deployment
+        run: |
+          mkdir -p _site
+          cp web/index.html _site/
+          cp web/ofdmtv.js _site/
+          cp web/ofdmtv.wasm _site/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
