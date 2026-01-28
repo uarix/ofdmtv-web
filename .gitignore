@@ -2,6 +2,8 @@
 *.wav
 *.txt
 *.ppm
+*.wasm
+ofdmtv.js
 !smpte.ppm
 encode
 decode

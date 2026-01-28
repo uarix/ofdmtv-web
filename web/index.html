@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OFDM TV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 瑞士风格配色：高对比度，纯粹 */
+            --color-primary: #0047AB; /* 科技蓝 Cobalt Blue */
+            --color-accent: #FF5722;  /* 活力橙 Vibrant Orange */
+            --color-black: #111111;
+            --color-gray-dark: #666666;
+            --color-gray-light: #F2F2F2;
+            --color-white: #FFFFFF;
+            --color-success: #008751;
+            
+            --spacing-unit: 8px;
+            --container-width: 1000px;
+            
+            --font-main: 'Inter', Helvetica, Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        /* Reset & Base */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-white);
+            color: var(--color-black);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
+        .text-mono { font-family: var(--font-mono); }
+        
+        /* Layout */
+        .grid-container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: calc(var(--spacing-unit) * 4);
+            width: 100%;
+        }
+
+        /* Header - International Typographic Style */
+        header {
+            margin-bottom: calc(var(--spacing-unit) * 6);
+            border-bottom: 4px solid var(--color-black);
+            padding-bottom: calc(var(--spacing-unit) * 2);
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            margin-bottom: var(--spacing-unit);
+            color: var(--color-primary);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: var(--color-gray-dark);
+            font-weight: 300;
+        }
+
+        /* Navigation / Tabs - Text based, strong borders */
+        .nav-tabs {
+            display: flex;
+            gap: calc(var(--spacing-unit) * 4);
+            margin-bottom: calc(var(--spacing-unit) * 6);
+            border-bottom: 1px solid var(--color-gray-light);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-gray-dark);
+            padding: var(--spacing-unit) 0;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab-btn:hover { color: var(--color-primary); }
+
+        .tab-btn.active {
+            color: var(--color-black);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--color-accent);
+        }
+
+        /* Content Area */
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Grid System for Inputs */
+        .swiss-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: calc(var(--spacing-unit) * 4);
+            margin-bottom: calc(var(--spacing-unit) * 4);
+        }
+
+        @media (max-width: 768px) {
+            .swiss-grid { grid-template-columns: 1fr; }
+            header h1 { font-size: 2rem; }
+            .nav-tabs { gap: calc(var(--spacing-unit) * 2); overflow-x: auto; }
+            .tab-btn { white-space: nowrap; }
+        }
+
+        /* Form Elements - Minimalist */
+        .form-group { margin-bottom: calc(var(--spacing-unit) * 3); }
+        
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            color: var(--color-gray-dark);
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            border-bottom: 2px solid var(--color-gray-light);
+            background: transparent;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: var(--color-black);
+            transition: border-color 0.3s;
+            border-radius: 0;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-bottom-color: var(--color-primary);
+        }
+
+        /* Buttons - Swiss Style (Flat, Bold) */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+        }
+        .btn-primary:hover { background-color: #003685; }
+
+        .btn-accent {
+            background-color: var(--color-accent);
+            color: var(--color-white);
+        }
+        .btn-accent:hover { background-color: #D84315; }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--color-black);
+            color: var(--color-black);
+        }
+        .btn-outline:hover { background: var(--color-black); color: var(--color-white); }
+
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Areas & Boxes */
+        .preview-container {
+            background-color: var(--color-gray-light);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: calc(var(--spacing-unit) * 2);
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .preview-container.dragover {
+            background-color: #E8EAF6;
+            border: 1px dashed var(--color-primary);
+        }
+
+        .preview-container canvas {
+            max-width: 100%;
+            max-height: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .placeholder-text {
+            text-align: center;
+            color: var(--color-gray-dark);
+        }
+        .placeholder-icon { font-size: 3rem; display: block; margin-bottom: 10px; color: var(--color-primary); }
+
+        /* Waveform */
+        .waveform-box {
+            background: var(--color-black);
+            height: 120px;
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+        }
+        .waveform-box canvas { width: 100%; height: 100%; display: block; }
+        .waveform-label {
+            position: absolute;
+            top: 5px; left: 5px;
+            color: var(--color-primary);
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+        }
+
+        /* Status & Progress */
+        .progress-container {
+            height: 4px;
+            background: var(--color-gray-light);
+            width: 100%;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--color-accent);
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--color-gray-dark);
+            border-left: 3px solid transparent;
+            padding-left: 10px;
+        }
+        .status-text.success { border-color: var(--color-success); color: var(--color-success); }
+        .status-text.error { border-color: var(--color-accent); color: var(--color-accent); }
+        .status-text.info { border-color: var(--color-primary); }
+
+        /* Realtime History Section */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--color-gray-light);
+            padding-top: 20px;
+        }
+        .history-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+        }
+        .history-item {
+            background: var(--color-gray-light);
+            padding: 10px;
+            transition: transform 0.2s;
+        }
+        .history-item:hover { transform: translateY(-3px); }
+        .history-img { width: 100%; display: block; margin-bottom: 8px; background: #000; }
+        .history-meta { font-size: 0.75rem; font-family: var(--font-mono); color: var(--color-gray-dark); margin-bottom: 8px; }
+        .history-btn {
+            width: 100%;
+            padding: 6px;
+            font-size: 0.8rem;
+            background: var(--color-black);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .history-btn:hover { background: var(--color-primary); }
+
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--color-white);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .loader {
+            width: 40px; height: 40px;
+            border: 3px solid var(--color-gray-light);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 40px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--color-gray-dark);
+            border-top: 1px solid var(--color-gray-light);
+        }
+        footer a { color: var(--color-black); text-decoration: none; font-weight: 600; }
+        footer a:hover { color: var(--color-primary); }
+
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay">
+        <div class="loader"></div>
+        <p style="margin-top: 20px; font-weight: 600;">LOADING MODULE</p>
+    </div>
+
+    <div class="grid-container">
+        <header>
+            <h1>OFDM TV</h1>
+            <p>Image/Audio Codec <br> Based on Orthogonal Frequency Division Multiplexing</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="encode">01 ENCODE</button>
+            <button class="tab-btn" data-tab="decode">02 DECODE</button>
+            <button class="tab-btn" data-tab="realtime" style="color: var(--color-accent);">03 REALTIME</button>
+        </nav>
+
+        <!-- ENCODE SECTION -->
+        <main id="encode" class="tab-content active">
+            <div class="swiss-grid">
+                <!-- Settings Column -->
+                <div>
+                    <div class="form-group">
+                        <label for="callSign">Call Sign / ID</label>
+                        <input type="text" id="callSign" placeholder="ANONYMOUS" maxlength="9" value="ANONYMOUS">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sampleRate">Sample Rate (Hz)</label>
+                        <select id="sampleRate">
+                            <option value="8000">8000</option>
+                            <option value="16000">16000</option>
+                            <option value="44100">44100</option>
+                            <option value="48000" selected>48000</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-outline" id="loadSampleBtn" style="width: 100%; margin-bottom: 20px;">
+                        Load SMPTE Pattern
+                    </button>
+                    
+                    <button class="btn btn-primary" id="encodeBtn" style="width: 100%;" disabled>
+                        Start Encoding
+                    </button>
+
+                    <div class="status-text" id="encodeStatus">Waiting for input...</div>
+                    <div class="progress-container"><div class="progress-bar" id="encodeProgressBar"></div></div>
+                </div>
+
+                <!-- Preview Column -->
+                <div>
+                    <!-- Image Input -->
+                    <div class="preview-container drop-zone" id="imageDropZone">
+                        <div class="placeholder-text" id="imagePlaceholder">
+                            <span class="placeholder-icon">↓</span>
+                            <p>DROP IMAGE HERE</p>
+                            <p style="font-size: 0.8rem; opacity: 0.6;">JPG/PNG/BMP (Resized to 320x240)</p>
+                        </div>
+                        <canvas id="inputImageCanvas" class="hidden"></canvas>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+
+                    <!-- Audio Output -->
+                    <div id="audioOutputBox" class="hidden">
+                        <div class="waveform-box">
+                            <div class="waveform-label">AUDIO OUTPUT SIGNAL</div>
+                            <canvas id="waveformCanvas"></canvas>
+                        </div>
+                        <audio id="encodedAudio" controls style="width: 100%; margin-top: 10px;"></audio>
+                        <button class="btn btn-accent" id="downloadAudio" style="width: 100%; margin-top: 10px;">
+                            Download .WAV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- DECODE SECTION -->
+        <main id="decode" class="tab-content">
+            <div class="swiss-grid">
+                <!-- Input Column -->
+                <div>
+                    <label>Audio Source</label>
+                    <div class="preview-container drop-zone" id="audioDropZone" style="height: 150px; min-height: auto;">
+                        <div class="placeholder-text" id="audioInputPlaceholder">
+                            <span class="placeholder-icon">♪</span>
+                            <p>DROP WAV FILE</p>
+                        </div>
+                        <div id="audioInputPreview" class="hidden" style="width: 100%; padding: 20px;">
+                            <audio id="inputAudio" controls style="width: 100%;"></audio>
+                            <div class="text-mono" id="audioInfo" style="font-size: 0.8rem; margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                    <input type="file" id="audioFileInput" accept="audio/wav,.wav" class="hidden">
+
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>
+                            <input type="checkbox" id="progressiveDecode" checked style="margin-right: 10px;">
+                            Progressive Scan Mode (SSTV Style)
+                        </label>
+                    </div>
+
+                    <button class="btn btn-primary" id="decodeBtn" style="width: 100%;" disabled>
+                        Start Decoding
+                    </button>
+                    
+                    <div class="status-text" id="decodeStatus">Ready to decode.</div>
+                    <div class="progress-container"><div class="progress-bar" id="decodeProgressBar"></div></div>
+                </div>
+
+                <!-- Output Column -->
+                <div>
+                    <label>Decoded Image</label>
+                    <div class="preview-container">
+                        <div class="placeholder-text" id="decodedImagePlaceholder">
+                            <p>WAITING FOR SIGNAL...</p>
+                        </div>
+                        <div id="decodedImageContainer" class="hidden" style="width: 100%; text-align: center;">
+                            <canvas id="decodedImageCanvas"></canvas>
+                            <div class="text-mono" id="decodeInfo" style="margin-top: 10px; font-size: 0.8rem;"></div>
+                            <button class="btn btn-outline" id="downloadImage" style="width: 100%; margin-top: 10px;">Download Image</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- REALTIME SECTION -->
+        <main id="realtime" class="tab-content">
+            <div class="swiss-grid">
+                <!-- Controls -->
+                <div>
+                    <div class="form-group">
+                        <label for="realtimeSampleRate">Input Sample Rate</label>
+                        <select id="realtimeSampleRate">
+                            <option value="44100">44100 Hz</option>
+                            <option value="48000" selected>48000 Hz</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="audioSource">Audio Device</label>
+                        <select id="audioSource">
+                            <option value="">Default Microphone</option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                        <button class="btn btn-primary" id="startRealtime">
+                            Start Listen
+                        </button>
+                        <button class="btn btn-accent" id="stopRealtime" disabled>
+                            Stop
+                        </button>
+                    </div>
+
+                    <div class="waveform-box">
+                        <div class="waveform-label">LIVE SPECTRUM INPUT</div>
+                        <canvas id="realtimeWaveform"></canvas>
+                    </div>
+                    <div class="text-mono" id="realtimeStatus" style="margin-top: 10px; font-size: 0.8rem;">State: Idle</div>
+                    <div class="progress-container"><div class="progress-bar" id="realtimeProgressBar"></div></div>
+                </div>
+
+                <!-- Display -->
+                <div>
+                    <div class="preview-container" style="background: #000;">
+                        <div class="placeholder-text" id="realtimePlaceholder" style="color: #666;">
+                            <p>LIVE FEED</p>
+                        </div>
+                        <div id="realtimeImageContainer" class="hidden">
+                            <canvas id="realtimeImageCanvas"></canvas>
+                            <div class="text-mono" id="realtimeDecodeInfo" style="color: #fff; margin-top: 10px; font-size: 0.8rem;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: HISTORY SECTION -->
+            <div class="history-section">
+                <div class="history-title">
+                    <span>RECEIVED HISTORY</span>
+                </div>
+                <div class="history-grid" id="historyGrid">
+                    <div class="history-item" style="display: flex; align-items: center; justify-content: center; background: transparent; border: 1px dashed #ccc; color: #999;">
+                        <span style="font-size: 0.8rem;">No history yet</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p><a href="https://github.com/aicodix/ofdmtv" target="_blank">View Source on GitHub</a></p>
+        </footer>
+    </div>
+
+    <script src="ofdmtv.js"></script>
+    
+    <script>
+        // Global State
+        let wasmModule = null;
+        let currentImageData = null;
+        let currentAudioData = null;
+        let encodedWavBlob = null;
+        let analyser = null;
+        
+        // DOM Elements
+        const els = {
+            loadingOverlay: document.getElementById('loadingOverlay'),
+            tabs: document.querySelectorAll('.tab-btn'),
+            contents: document.querySelectorAll('.tab-content'),
+            encodeStatus: document.getElementById('encodeStatus'),
+            decodeStatus: document.getElementById('decodeStatus'),
+            realtimeStatus: document.getElementById('realtimeStatus'), // Fixed ID reference
+            historyGrid: document.getElementById('historyGrid')
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                wasmModule = await Module();
+                console.log('WASM Module Ready');
+                els.loadingOverlay.classList.add('hidden');
+            } catch (e) {
+                console.error('WASM Init Failed:', e);
+                els.loadingOverlay.innerHTML = `<p style="color:var(--color-accent)">INIT FAILED: ${e.message}</p>`;
+            }
+
+            setupUI();
+            setupEncode();
+            setupDecode();
+            setupRealtime();
+        });
+
+        function setupUI() {
+            // Tab Switching
+            els.tabs.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    els.tabs.forEach(b => b.classList.remove('active'));
+                    els.contents.forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(btn.dataset.tab).classList.add('active');
+                });
+            });
+        }
+
+        function setStatus(id, msg, type = 'info') {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = `> ${msg}`;
+                el.className = `status-text ${type}`;
+            } else {
+                console.error(`Status element #${id} not found`);
+            }
+        }
+
+        // ================= ENCODE LOGIC =================
+        function setupEncode() {
+            const dropZone = document.getElementById('imageDropZone');
+            const input = document.getElementById('imageInput');
+            
+            // Drag & Drop
+            dropZone.addEventListener('click', () => input.click());
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]);
+            });
+            input.addEventListener('change', (e) => { if (e.target.files.length) handleImage(e.target.files[0]); });
+
+            // Buttons
+            document.getElementById('loadSampleBtn').addEventListener('click', loadSMPTE);
+            document.getElementById('encodeBtn').addEventListener('click', runEncode);
+            document.getElementById('downloadAudio').addEventListener('click', () => {
+                if (encodedWavBlob) {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(encodedWavBlob);
+                    a.download = `OFDM_${Date.now()}.wav`;
+                    a.click();
+                }
+            });
+        }
+
+        function handleImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => processImageToCanvas(img);
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadSMPTE() {
+            // Simulated image loading for the sake of brevity in logic, drawing colors directly
+            const canvas = document.getElementById('inputImageCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 320; canvas.height = 240;
+            
+            // Simple SMPTE Bars
+            const colors = ['#c0c0c0', '#c0c000', '#00c0c0', '#00c000', '#c000c0', '#c00000', '#0000c0'];
+            const w = 320/7;
+            colors.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(i*w, 0, w+1, 160); });
+            // Bottom part
+            ctx.fillStyle = '#111'; ctx.fillRect(0, 160, 320, 80);
+            ctx.fillStyle = '#fff'; ctx.fillRect(40, 180, 60, 60);
+
+            // Update State
+            currentImageData = ctx.getImageData(0,0,320,240);
+            showImagePreview();
+        }
+
+        function processImageToCanvas(img) {
+            const canvas = document.getElementById('inputImageCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 320; canvas.height = 240;
+            ctx.drawImage(img, 0, 0, 320, 240);
+            currentImageData = ctx.getImageData(0,0,320,240);
+            showImagePreview();
+        }
+
+        function showImagePreview() {
+            document.getElementById('imagePlaceholder').classList.add('hidden');
+            document.getElementById('inputImageCanvas').classList.remove('hidden');
+            document.getElementById('encodeBtn').disabled = false;
+            setStatus('encodeStatus', 'Image loaded (320x240)', 'success');
+        }
+
+        async function runEncode() {
+            if (!wasmModule || !currentImageData) return;
+            
+            const btn = document.getElementById('encodeBtn');
+            const bar = document.getElementById('encodeProgressBar');
+            
+            btn.disabled = true;
+            bar.style.width = '20%';
+            setStatus('encodeStatus', 'Processing RGB data...');
+            
+            await new Promise(r => setTimeout(r, 50)); // UI Breath
+
+            try {
+                const callSign = document.getElementById('callSign').value.toUpperCase() || 'ANONYMOUS';
+                const sr = parseInt(document.getElementById('sampleRate').value);
+                
+                // Convert RGBA to RGB
+                const rgb = new Uint8Array(320*240*3);
+                for(let i=0, j=0; i < currentImageData.data.length; i+=4) {
+                    rgb[j++] = currentImageData.data[i];
+                    rgb[j++] = currentImageData.data[i+1];
+                    rgb[j++] = currentImageData.data[i+2];
+                }
+
+                bar.style.width = '60%';
+                setStatus('encodeStatus', 'OFDM Modulation in progress...');
+                await new Promise(r => setTimeout(r, 50));
+
+                const result = wasmModule.encodeImage(rgb, 320, 240, sr, callSign);
+                
+                bar.style.width = '100%';
+                
+                if (result) {
+                    encodedWavBlob = new Blob([result], { type: 'audio/wav' });
+                    const audio = document.getElementById('encodedAudio');
+                    audio.src = URL.createObjectURL(encodedWavBlob);
+                    
+                    document.getElementById('audioOutputBox').classList.remove('hidden');
+                    drawStaticWaveform(result, 'waveformCanvas');
+                    setStatus('encodeStatus', `Encoded successfully (${(result.length/1024).toFixed(1)} KB)`, 'success');
+                } else {
+                    throw new Error("Encoding returned null");
+                }
+
+            } catch(e) {
+                setStatus('encodeStatus', `Error: ${e.message}`, 'error');
+            }
+            
+            btn.disabled = false;
+        }
+
+        // ================= DECODE LOGIC =================
+        function setupDecode() {
+            const drop = document.getElementById('audioDropZone');
+            const input = document.getElementById('audioFileInput');
+            
+            drop.addEventListener('click', () => input.click());
+            drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('dragover'); });
+            drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+            drop.addEventListener('drop', (e) => {
+                e.preventDefault(); drop.classList.remove('dragover');
+                if (e.dataTransfer.files.length) handleAudio(e.dataTransfer.files[0]);
+            });
+            input.addEventListener('change', (e) => { if (e.target.files.length) handleAudio(e.target.files[0]); });
+            
+            document.getElementById('decodeBtn').addEventListener('click', runDecode);
+            document.getElementById('downloadImage').addEventListener('click', () => {
+                const canvas = document.getElementById('decodedImageCanvas');
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = 'decoded_image.png';
+                a.click();
+            });
+        }
+
+        async function handleAudio(file) {
+            setStatus('decodeStatus', 'Parsing Audio File...');
+            const buf = await file.arrayBuffer();
+            
+            // Minimal WAV Parsing logic to get samples float32
+            try {
+                const view = new DataView(buf);
+                if (String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3)) !== 'RIFF') throw new Error("Not RIFF");
+                
+                const channels = view.getUint16(22, true);
+                const sampleRate = view.getUint32(24, true);
+                const bits = view.getUint16(34, true);
+                
+                // Locate Data Chunk
+                let offset = 12;
+                while(offset < buf.byteLength) {
+                    const id = String.fromCharCode(view.getUint8(offset), view.getUint8(offset+1), view.getUint8(offset+2), view.getUint8(offset+3));
+                    const size = view.getUint32(offset+4, true);
+                    if(id === 'data') { offset += 8; break; }
+                    offset += 8 + size;
+                }
+                
+                const samplesCount = (buf.byteLength - offset) / (bits/8) / channels;
+                const floatData = new Float32Array(samplesCount); // Using only Ch1
+                
+                for(let i=0; i<samplesCount; i++) {
+                    // Simplified: assuming 16bit for robustness demo
+                    const s = view.getInt16(offset + i * channels * 2, true); 
+                    floatData[i] = s / 32768.0;
+                }
+
+                currentAudioData = { samples: floatData, sampleRate, channels: 1 };
+                
+                // UI Update
+                document.getElementById('audioInputPlaceholder').classList.add('hidden');
+                document.getElementById('audioInputPreview').classList.remove('hidden');
+                document.getElementById('inputAudio').src = URL.createObjectURL(file);
+                document.getElementById('audioInfo').innerHTML = `SR: ${sampleRate}Hz | Dur: ${(samplesCount/sampleRate).toFixed(1)}s`;
+                document.getElementById('decodeBtn').disabled = false;
+                setStatus('decodeStatus', 'Audio Loaded. Ready to decode.', 'success');
+
+            } catch(e) {
+                setStatus('decodeStatus', 'Invalid WAV: ' + e.message, 'error');
+            }
+        }
+
+        async function runDecode() {
+            const btn = document.getElementById('decodeBtn');
+            const bar = document.getElementById('decodeProgressBar');
+            const isProg = document.getElementById('progressiveDecode').checked;
+            
+            btn.disabled = true;
+            bar.style.width = '0%';
+            
+            const canvas = document.getElementById('decodedImageCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 320; canvas.height = 240;
+            
+            document.getElementById('decodedImagePlaceholder').classList.add('hidden');
+            document.getElementById('decodedImageContainer').classList.remove('hidden');
+            
+            if(isProg) {
+                ctx.fillStyle = '#000'; ctx.fillRect(0,0,320,240);
+                
+                // Progressive Callback
+                const lineCb = (line, num, data) => {
+                    const imgD = ctx.createImageData(320, num);
+                    for(let i=0, j=0; i<data.length; i+=3, j+=4) {
+                        imgD.data[j] = data[i]; imgD.data[j+1] = data[i+1]; imgD.data[j+2] = data[i+2]; imgD.data[j+3] = 255;
+                    }
+                    ctx.putImageData(imgD, 0, line);
+                    const pct = ((line+num)/240)*100;
+                    bar.style.width = pct + '%';
+                    setStatus('decodeStatus', `Decoding Line ${line}...`);
+                };
+                
+                wasmModule.decodeAudioStreaming(currentAudioData.samples, currentAudioData.sampleRate, 1, lineCb);
+                setStatus('decodeStatus', 'Decoding Complete', 'success');
+            } else {
+                // Bulk Decode
+                const res = wasmModule.decodeAudio(currentAudioData.samples, currentAudioData.sampleRate, 1);
+                if(res.success) {
+                    const imgD = ctx.createImageData(320, 240);
+                    const d = res.imageData;
+                    for(let i=0, j=0; i<d.length; i+=3, j+=4) {
+                        imgD.data[j] = d[i]; imgD.data[j+1] = d[i+1]; imgD.data[j+2] = d[i+2]; imgD.data[j+3] = 255;
+                    }
+                    ctx.putImageData(imgD, 0, 0);
+                    bar.style.width = '100%';
+                    document.getElementById('decodeInfo').innerText = `ID: ${res.callSign}`;
+                    setStatus('decodeStatus', 'Decoded Successfully', 'success');
+                } else {
+                    setStatus('decodeStatus', 'Decode Failed', 'error');
+                }
+            }
+            btn.disabled = false;
+        }
+
+        // ================= REALTIME & HISTORY LOGIC =================
+        let rtContext, rtProcessor, rtStream, rtActive = false;
+        let historyStore = [];
+
+        function setupRealtime() {
+            document.getElementById('startRealtime').addEventListener('click', startRealtime);
+            document.getElementById('stopRealtime').addEventListener('click', stopRealtime);
+            
+            // Populate devices on load and when clicking the tab
+            getAudioDevices();
+            navigator.mediaDevices.ondevicechange = getAudioDevices;
+        }
+
+        async function getAudioDevices() {
+            const select = document.getElementById('audioSource');
+            try {
+                // Check if we already have permission, otherwise enumeration might return empty labels
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const audioInputs = devices.filter(device => device.kind === 'audioinput');
+                
+                // Preserve selection if possible
+                const currentSelection = select.value;
+                select.innerHTML = '';
+                
+                audioInputs.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Microphone ${select.length + 1}`;
+                    select.appendChild(option);
+                });
+
+                if (currentSelection && [...select.options].some(o => o.value === currentSelection)) {
+                    select.value = currentSelection;
+                }
+                
+                // If no labels, it might be because of no permission yet. 
+                // We'll update again after startRealtime requests permission.
+                if (audioInputs.length > 0 && !audioInputs[0].label) {
+                     const opt = document.createElement('option');
+                     opt.value = '';
+                     opt.text = 'Default (Permission needed to list others)';
+                     if(select.options.length === 0) select.appendChild(opt);
+                }
+
+            } catch (e) {
+                console.warn('Error listing devices:', e);
+            }
+        }
+
+        async function startRealtime() {
+            const sr = parseInt(document.getElementById('realtimeSampleRate').value);
+            const deviceId = document.getElementById('audioSource').value;
+            
+            try {
+                const constraints = {
+                    audio: {
+                        sampleRate: sr,
+                        channelCount: 1,
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    }
+                };
+                
+                // Add device ID if selected
+                if (deviceId) {
+                    constraints.audio.deviceId = { exact: deviceId };
+                }
+
+                rtStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Update device list now that we have permission
+                getAudioDevices();
+
+                rtContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: sr });
+                analyser = rtContext.createAnalyser();
+                analyser.fftSize = 2048;
+                
+                const source = rtContext.createMediaStreamSource(rtStream);
+                source.connect(analyser);
+                
+                // UI Init
+                const canvas = document.getElementById('realtimeImageCanvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 320; canvas.height = 240;
+                ctx.fillStyle = '#000'; ctx.fillRect(0,0,320,240);
+                
+                document.getElementById('realtimePlaceholder').classList.add('hidden');
+                document.getElementById('realtimeImageContainer').classList.remove('hidden');
+                document.getElementById('startRealtime').disabled = true;
+                document.getElementById('stopRealtime').disabled = false;
+                document.getElementById('audioSource').disabled = true; // Lock selection while running
+                
+                // Status Callback for History
+                const onStatus = (status, callSign) => {
+                    if(status === 'complete') {
+                        setStatus('realtimeStatus', `Decoded: ${callSign}`, 'success');
+                        
+                        // --- HISTORY FEATURE ---
+                        // Capture snapshot immediately before it clears
+                        const snapshot = canvas.toDataURL('image/png');
+                        addToHistory(snapshot, callSign);
+                        
+                        // Clear after delay
+                        setTimeout(() => {
+                            if(rtActive) {
+                                ctx.fillStyle = '#000'; ctx.fillRect(0,0,320,240);
+                                document.getElementById('realtimeProgressBar').style.width = '0%';
+                                setStatus('realtimeStatus', 'Listening...', 'info');
+                            }
+                        }, 3000);
+                    } else if (status === 'waiting') {
+                         setStatus('realtimeStatus', 'Listening for preamble...', 'info');
+                    }
+                };
+
+                wasmModule.initRealtimeDecoder(sr, null, onStatus);
+                
+                // Audio Process Loop
+                rtProcessor = rtContext.createScriptProcessor(4096, 1, 1);
+                rtProcessor.onaudioprocess = (e) => {
+                    if(!rtActive) return;
+                    const input = e.inputBuffer.getChannelData(0);
+                    wasmModule.pushRealtimeSamples(new Float32Array(input));
+                    drawRealtimeSpectrum();
+                };
+                
+                source.connect(rtProcessor);
+                rtProcessor.connect(rtContext.destination);
+                
+                rtActive = true;
+                requestIdleCallback(realtimeDecodeLoop);
+                updateBufferStatusLoop();
+                
+                setStatus('realtimeStatus', 'Mic active. Listening...', 'info');
+
+            } catch(e) {
+                setStatus('realtimeStatus', `Mic Error: ${e.message}`, 'error');
+                console.error(e);
+            }
+        }
+
+        function realtimeDecodeLoop() {
+            if(!rtActive) return;
+            try {
+                const res = wasmModule.tryRealtimeDecode();
+                if(res.status === 'success' && res.imageData) {
+                     const canvas = document.getElementById('realtimeImageCanvas');
+                     const ctx = canvas.getContext('2d');
+                     const imgD = ctx.createImageData(320, 240);
+                     for(let i=0, j=0; i<res.imageData.length; i+=3, j+=4) {
+                        imgD.data[j] = res.imageData[i]; imgD.data[j+1] = res.imageData[i+1];
+                        imgD.data[j+2] = res.imageData[i+2]; imgD.data[j+3] = 255;
+                     }
+                     ctx.putImageData(imgD, 0, 0);
+                     document.getElementById('realtimeDecodeInfo').textContent = `ID: ${res.callSign}`;
+                     document.getElementById('realtimeProgressBar').style.width = '100%';
+                }
+            } catch(e) {}
+            
+            if(rtActive) requestIdleCallback(realtimeDecodeLoop, { timeout: 1000 });
+        }
+        
+        function updateBufferStatusLoop() {
+             if(!rtActive) return;
+             const s = wasmModule.getRealtimeStatus();
+             if(s.duration < s.minNeeded) {
+                 const pct = (s.duration / s.minNeeded) * 100;
+                 document.getElementById('realtimeProgressBar').style.width = pct + '%';
+                 setStatus('realtimeStatus', `Buffering Signal: ${s.duration.toFixed(1)}s`);
+             }
+             requestAnimationFrame(updateBufferStatusLoop);
+        }
+
+        function stopRealtime() {
+            rtActive = false;
+            if(rtStream) rtStream.getTracks().forEach(t => t.stop());
+            if(rtContext) rtContext.close();
+            if(rtProcessor) rtProcessor.disconnect();
+            if(wasmModule) wasmModule.stopRealtimeDecoder();
+            
+            document.getElementById('startRealtime').disabled = false;
+            document.getElementById('stopRealtime').disabled = true;
+            document.getElementById('audioSource').disabled = false;
+            setStatus('realtimeStatus', 'Stopped', 'info');
+        }
+
+        // ================= VISUALIZERS =================
+        function drawStaticWaveform(wavData, id) {
+             const canvas = document.getElementById(id);
+             const ctx = canvas.getContext('2d');
+             canvas.width = canvas.offsetWidth; canvas.height = 120;
+             const samples = new Int16Array(wavData.buffer, 44);
+             const step = Math.ceil(samples.length / canvas.width);
+             
+             ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width, canvas.height);
+             ctx.strokeStyle = '#0047AB'; ctx.beginPath();
+             
+             const h = canvas.height / 2;
+             for(let i=0; i<canvas.width; i++) {
+                 const v = samples[i*step] / 32768.0;
+                 ctx.lineTo(i, h + v*h);
+             }
+             ctx.stroke();
+        }
+
+        function drawRealtimeSpectrum() {
+            if(!analyser) return;
+            const canvas = document.getElementById('realtimeWaveform');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth; canvas.height = 120;
+            
+            const len = analyser.frequencyBinCount;
+            const data = new Uint8Array(len);
+            analyser.getByteFrequencyData(data); // Spectrum instead of Waveform for nicer look
+            
+            ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width, canvas.height);
+            const w = canvas.width / len * 2.5;
+            let x = 0;
+            
+            for(let i=0; i<len; i++) {
+                const v = data[i];
+                const h = (v/255) * canvas.height;
+                ctx.fillStyle = `rgb(${v+50}, 87, 34)`; // Orange-ish tint based on intensity
+                if(v > 100) ctx.fillStyle = '#FF5722'; // Peak color
+                ctx.fillRect(x, canvas.height - h, w, h);
+                x += w + 1;
+            }
+        }
+
+        // ================= HISTORY FEATURE =================
+        function addToHistory(dataUrl, callSign) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            
+            // Remove empty placeholder
+            const grid = document.getElementById('historyGrid');
+            if(grid.children[0] && grid.children[0].innerText.includes('No history')) {
+                grid.innerHTML = '';
+            }
+            
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `
+                <img src="${dataUrl}" class="history-img">
+                <div class="history-meta">
+                    <strong>${callSign}</strong><br>
+                    ${timeStr}
+                </div>
+                <button class="history-btn" onclick="downloadHistoryItem(this)">DOWNLOAD</button>
+            `;
+            
+            // Prepend new item
+            grid.insertBefore(item, grid.firstChild);
+        }
+        
+        // Global scope for onclick access
+        window.downloadHistoryItem = function(btn) {
+            const img = btn.parentElement.querySelector('img');
+            const meta = btn.parentElement.querySelector('.history-meta').innerText.split('\n');
+            const call = meta[0];
+            
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = `OFDM_${call}_${Date.now()}.png`;
+            a.click();
+        }
+
+    </script>
+</body>
+</html>
