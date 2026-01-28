@@ -1,6 +1,7 @@
 EMCC = em++
 EMCC_FLAGS = -std=c++17 -O2 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=0 \
              -s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=134217728 \
+             -s STACK_SIZE=5242880 \
              -s EXPORTED_FUNCTIONS='["_malloc","_free"]' \
              -s EXPORTED_RUNTIME_METHODS='["HEAPF32"]' \
              --bind -I../../dsp -I../../code
